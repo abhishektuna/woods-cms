@@ -1,17 +1,25 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchProducts, deleteProduct } from "../products.slice";
+import { fetchCategories } from "../../categories/categories.slice";
+import { fetchSubCategories } from "../../subcategories/subcategories.slice";
 import { Button } from "../../../components/common/Button/Button";
 import { ProductForm } from "../components/ProductForm";
 import { Search, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
-import { confirm } from "react-confirm-box";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
+const Swal = await import("sweetalert2");
 
 export function ProductPage() {
   const dispatch = useAppDispatch();
   const products = useAppSelector((state) => state.products);
+  const categoriesState = useAppSelector((state) => state.categories);
+  const subcategoriesState = useAppSelector((state) => state.subcategories);
   const productsArr = products.data || [];
+  const categoriesArr = Array.isArray(categoriesState.data) ? categoriesState.data : [];
+  const subcategoriesArr = Array.isArray(subcategoriesState.data) ? subcategoriesState.data : [];
+
+  console.log(productsArr)
 
   // Form states
   const [showForm, setShowForm] = useState(false);
@@ -32,23 +40,20 @@ export function ProductPage() {
   /* -------------------- Fetch Products -------------------- */
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchCategories());
+    dispatch(fetchSubCategories());
   }, [dispatch]);
 
   // Extract unique categories and subcategories
   const { categories, subcategories } = useMemo(() => {
-    const cats = new Set<string>();
-    const subcats = new Set<string>();
-    
-    productsArr.forEach((p: any) => {
-      if (p.category) cats.add(p.category);
-      if (p.subcategory) subcats.add(p.subcategory);
-    });
+    const cats = categoriesArr.map((c: any) => c.title || c.name).filter(Boolean);
+    const subcats = subcategoriesArr.map((s: any) => s.title || s.name).filter(Boolean);
     
     return {
-      categories: Array.from(cats).sort(),
-      subcategories: Array.from(subcats).sort(),
+      categories: cats.sort(),
+      subcategories: subcats.sort(),
     };
-  }, [productsArr]);
+  }, [categoriesArr, subcategoriesArr]);
 
   // Filter and search products
   const filteredProducts = useMemo(() => {
@@ -59,10 +64,10 @@ export function ProductPage() {
         product.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesCategory =
-        selectedCategory === "all" || product.categoryType === selectedCategory;
+        selectedCategory === "all" || product.category?.name === selectedCategory;
 
       const matchesSubcategory =
-        selectedSubcategory === "all" || product.subcategory === selectedSubcategory;
+        selectedSubcategory === "all" || product.subcategory?.name === selectedSubcategory;
 
       return matchesSearch && matchesCategory && matchesSubcategory;
     });
@@ -90,11 +95,24 @@ export function ProductPage() {
   // };
 
   const handleDelete = async (productId: string) => {
-    const result = await confirm("Are you sure you want to delete this product?");
-    if (result) {
-      dispatch(deleteProduct(productId)).then(() => {
+    const result = await Swal.default.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteProduct(productId)).unwrap();
         toast.success("Product deleted successfully");
-      });
+      } catch (err) {
+        toast.error("Failed to delete product");
+        console.error(err);
+      }
     }
   };
 

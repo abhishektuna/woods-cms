@@ -8,8 +8,8 @@ import {
 import { fetchCategories } from "../../categories/categories.slice";
 import { Button } from "../../../components/common/Button/Button";
 import { Search, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
-import { confirm } from "react-confirm-box";
 import toast from "react-hot-toast";
+const Swal = await import("sweetalert2");
 
 export function SubCategoryPage() {
   const dispatch = useAppDispatch();
@@ -69,9 +69,25 @@ export function SubCategoryPage() {
   };
 
   const handleDelete = async (id: string) => {
-    const ok = await confirm("Are you sure you want to delete this subcategory?");
-    if (!ok) return;
-    dispatch(deleteSubCategory(id)).then(() => toast.success("Subcategory deleted"));
+    const result = await Swal.default.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteSubCategory(id)).unwrap();
+        toast.success("Subcategory deleted successfully");
+      } catch (err) {
+        toast.error("Failed to delete subcategory");
+        console.error(err);
+      }
+    }
   };
 
 

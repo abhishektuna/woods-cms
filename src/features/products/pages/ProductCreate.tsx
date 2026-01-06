@@ -148,6 +148,9 @@ export default function ProductForm() {
     setForm({ ...form, categoryType: "subcategory", categoryRef: id });
   };
 
+  console.log("subcategories:", subcategories);
+  console.log("categories:", categories);
+
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
@@ -320,10 +323,12 @@ export default function ProductForm() {
         isActive: !!form.isActive,
       };
 
+      console.log("Payload JSON:", payloadToSend);
 
       // Use unwrap so server errors are thrown and we can inspect response.data
       try {
         const payload = await dispatch(createProduct(payloadToSend)).unwrap();
+        console.log(payload);
         console.log("CREATE SUCCESS:", payload);
         toast.success("Product created");
         setTimeout(() => {

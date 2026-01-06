@@ -15,6 +15,7 @@ export function SubCategoryForm() {
     ? categories.data
     : categories?.data || [];
 
+    console.log(categoriesArr)
   const [title, setTitle] = useState("");
   // store image as URL (string)
   const [image, setImage] = useState<string>("");
@@ -55,6 +56,7 @@ export function SubCategoryForm() {
       navigate("/admin-dashboard/subcategory");
     } catch (err) {
       toast.error("Failed to create subcategory");
+      console.log("err",err)
     } finally {
       setSubmitting(false);
     }

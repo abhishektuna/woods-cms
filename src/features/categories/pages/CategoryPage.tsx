@@ -3,9 +3,9 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchCategories, deleteCategory } from "../categories.slice";
 import { Button } from "../../../components/common/Button/Button";
 import { Search, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
-import { confirm } from "react-confirm-box";
 import toast from "react-hot-toast";
 import { CategoryForm } from "../components/CategoryForm";
+const Swal = await import("sweetalert2");
 
 export function CategoryPage() {
   const dispatch = useAppDispatch();
@@ -61,12 +61,24 @@ export function CategoryPage() {
   };
 
   const handleDelete = async (categoryId: string) => {
-    const result = await confirm("Are you sure you want to delete this category?");
-    if (result) {
-      dispatch(deleteCategory(categoryId)).then(() => {
+    const result = await Swal.default.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteCategory(categoryId)).unwrap();
         toast.success("Category deleted successfully");
-        dispatch(fetchCategories());
-      });
+      } catch (err) {
+        toast.error("Failed to delete category");
+        console.error(err);
+      }
     }
   };
 
