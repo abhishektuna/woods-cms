@@ -35,7 +35,7 @@ export const updateCategoryAPI = async (
   id: string,
   payload: CategoryPayload
 ): Promise<Category> => {
-  const res = await API.put(`/categories/${id}`, payload);
+  const res = await API.patch(`/categories/${id}`, payload);
   return res.data.data || res.data;
 };
 

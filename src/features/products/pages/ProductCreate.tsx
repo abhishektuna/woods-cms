@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, Plus, Package, FileText } from "lucide-react";
+import { Trash2, Plus, Package } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchCategories } from "../../categories/categories.slice";
@@ -7,94 +7,12 @@ import { fetchSubCategories } from "../../subcategories/subcategories.slice";
 import { createProduct } from "../products.slice";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-// Enhanced TextInput Component
-const TextInput = ({
-  label,
-  value,
-  onChange,
-  placeholder = "",
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) => (
-  <div className="mb-4">
-    <label className="block text-sm font-semibold text-gray-700 mb-2">
-      {label}
-    </label>
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-    />
-  </div>
-);
-
-// Enhanced SelectBox Component
-const SelectBox = ({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: { label: string; value: string }[];
-  onChange: (v: string) => void;
-}) => (
-  <div className="mb-4">
-    <label className="block text-sm font-semibold text-gray-700 mb-2">
-      {label}
-    </label>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none bg-white"
-    >
-      <option value="">Select an option</option>
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
-
-// NOTE: File upload inputs removed — replaced by text URL inputs to accept image/video/pdf URLs.
-
-// Enhanced Button Component
-const Button = ({
-  text,
-  onClick,
-  variant = "primary",
-  icon: Icon,
-}: {
-  text: string;
-  onClick: () => void;
-  variant?: "primary" | "secondary" | "danger";
-  icon?: any;
-}) => {
-  const variants = {
-    primary: "bg-orange-500 hover:bg-orange-600 text-white",
-    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700",
-    danger: "bg-red-500 hover:bg-red-600 text-white",
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center px-4 py-2.5 rounded-lg font-medium transition-all ${variants[variant]} shadow-sm hover:shadow-md`}
-    >
-      {Icon && <Icon className="w-4 h-4 mr-2" />}
-      {text}
-    </button>
-  );
-};
+import { Button } from "../../../components/common";
+import { BasicInfoSection } from "../components/formSection/BasicInfoSection";
+import { AdvantagesSection } from "../components/formSection/AdvantagesSection";
+import { FeatureSection } from "../components/formSection/FeatureSection";
+import { SpecificationSection } from "../components/formSection/SpecificationSection";
+import { WarrantySection } from "../components/formSection/WarrantySection";
 
 // Main Product Form
 export default function ProductForm() {
@@ -116,6 +34,8 @@ export default function ProductForm() {
     specification: { description: "", image: "", video: "", pdf: "" },
     warranty: { description: "", image: "", video: "", pdf: "" },
   });
+
+  const [submitting, setSubmitting] = useState(false);
 
   const [tireKeyInput, setTireKeyInput] = useState("");
   const navigate = useNavigate();
@@ -202,6 +122,8 @@ export default function ProductForm() {
   };
 
   const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       // Build JSON payload matching the Postman example structure
       const advantagesMeta = (form.advantages?.type || []).map((t: any) => ({
@@ -346,6 +268,9 @@ export default function ProductForm() {
     } catch (err) {
       console.error(err);
     }
+    finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -362,367 +287,78 @@ export default function ProductForm() {
           </p>
         </div>
 
-        {/* Basic Information */}
+        <BasicInfoSection
+          form={form}
+          setForm={setForm}
+          categoriesArr={categoriesArr || []}
+          subcategoriesArr={subcategoriesArr || []}
+          selectedCategoryId={selectedCategoryId}
+          selectedSubcategoryId={selectedSubcategoryId}
+          onCategoryChange={handleCategoryChange}
+          onSubcategoryChange={handleSubcategoryChange}
+        />
+
+        {/* Product Tire Keys */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-orange-500" />
-            Basic Information
-          </h2>
-
-          <TextInput
-            label="Model Number"
-            value={form.modelNo}
-            onChange={(v) => (form.modelNo = v) && setForm({ ...form })}
-            placeholder="e.g., XYZ-1234"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <TextInput
-              label="Product Image URL"
-              value={form.product.image}
-              onChange={(v) => (form.product.image = v) && setForm({ ...form })}
-              placeholder="https://..."
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Product Tire Keys</h2>
+          <div className="flex gap-2 mb-3">
+            <input
+              value={tireKeyInput}
+              onChange={(e) => setTireKeyInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && addTireKey()}
+              placeholder="e.g., tire-key-1"
+              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
             />
-            <TextInput
-              label="Product Video URL"
-              value={form.product.video}
-              onChange={(v) => (form.product.video = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Product PDF URL"
-              value={form.product.pdf}
-              onChange={(v) => (form.product.pdf = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
+            <Button text="Add" onClick={addTireKey} icon={<Plus />} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SelectBox
-              label="Category"
-              value={selectedCategoryId}
-              options={(categoriesArr || []).map((c: any) => ({
-                label: c.title,
-                value: c._id,
-              }))}
-              onChange={handleCategoryChange}
-            />
-
-            <SelectBox
-              label="Subcategory"
-              value={selectedSubcategoryId}
-              options={(subcategoriesArr || []).map((s: any) => ({
-                label: s.title,
-                value: s._id,
-              }))}
-              onChange={handleSubcategoryChange}
-            />
-          </div>
-
-          <TextInput
-            label="Description"
-            value={form.description}
-            onChange={(v) => (form.description = v) && setForm({ ...form })}
-            placeholder="Enter product description"
-          />
-
-          {/* Product Tire Keys */}
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Product Tire Keys
-            </label>
-            <div className="flex gap-2 mb-3">
-              <input
-                value={tireKeyInput}
-                onChange={(e) => setTireKeyInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && addTireKey()}
-                placeholder="e.g., tire-key-1"
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-              />
-              <Button
-                text="Add"
-                onClick={addTireKey}
-                variant="secondary"
-                icon={Plus}
-              />
-            </div>
-            {form.product_tire_key.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {form.product_tire_key.map((key: string, index: number) => (
-                  <div
-                    key={index}
-                    className="inline-flex items-center bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-sm font-medium"
-                  >
-                    <span>{key}</span>
-                    <button
-                      onClick={() => removeTireKey(index)}
-                      className="ml-2 text-orange-600 hover:text-orange-800 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Advantages Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">
-            Product Advantages
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <TextInput
-              label="Advantage Image URL"
-              value={form.advantages.image}
-              onChange={(v) =>
-                (form.advantages.image = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Advantage Video URL"
-              value={form.advantages.video}
-              onChange={(v) =>
-                (form.advantages.video = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Advantage PDF URL"
-              value={form.advantages.pdf}
-              onChange={(v) =>
-                (form.advantages.pdf = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-          </div>
-
-          <Button
-            text="Add Advantage Type"
-            onClick={addAdvantageType}
-            icon={Plus}
-          />
-
-          {/* Advantage Types */}
-          <div className="mt-6 space-y-4">
-            {form.advantages.type.map((adv: any, aIndex: number) => (
-              <div
-                key={aIndex}
-                className="border-2 border-gray-200 rounded-xl p-6 bg-gray-50"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-700">
-                    Advantage Type #{aIndex + 1}
-                  </h3>
+          {form.product_tire_key.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.product_tire_key.map((key: string, index: number) => (
+                <div
+                  key={index}
+                  className="inline-flex items-center bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-sm font-medium"
+                >
+                  <span>{key}</span>
                   <button
-                    onClick={() => removeAdvantageType(aIndex)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
+                    onClick={() => removeTireKey(index)}
+                    className="ml-2 text-orange-600 hover:text-orange-800 transition-colors"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-
-                <TextInput
-                  label="Advantage Title"
-                  value={adv.title}
-                  onChange={(v) => (adv.title = v) && setForm({ ...form })}
-                  placeholder="Enter advantage title"
-                />
-
-                <Button
-                  text="Add Point"
-                  onClick={() => addPoint(aIndex)}
-                  variant="secondary"
-                  icon={Plus}
-                />
-
-                {/* Points */}
-                <div className="mt-4 space-y-4">
-                  {adv.points.map((p: any, pIndex: number) => (
-                    <div
-                      key={pIndex}
-                      className="bg-white border border-gray-200 rounded-lg p-4"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-semibold text-gray-600">
-                          Point #{pIndex + 1}
-                        </h4>
-                        <button
-                          onClick={() => removePoint(aIndex, pIndex)}
-                          className="text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <TextInput
-                        label="Point Title"
-                        value={p.title}
-                        onChange={(v) => (p.title = v) && setForm({ ...form })}
-                        placeholder="Enter point title"
-                      />
-                      <TextInput
-                        label="Point Description"
-                        value={p.description}
-                        onChange={(v) =>
-                          (p.description = v) && setForm({ ...form })
-                        }
-                        placeholder="Enter point description"
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <TextInput
-                          label="Image URL"
-                          value={p.image}
-                          onChange={(v) =>
-                            (p.image = v) && setForm({ ...form })
-                          }
-                          placeholder="https://..."
-                        />
-                        <TextInput
-                          label="Video URL"
-                          value={p.video}
-                          onChange={(v) =>
-                            (p.video = v) && setForm({ ...form })
-                          }
-                          placeholder="https://..."
-                        />
-                        <TextInput
-                          label="PDF URL"
-                          value={p.pdf}
-                          onChange={(v) => (p.pdf = v) && setForm({ ...form })}
-                          placeholder="https://..."
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-        {/* feature Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-orange-500" />
-            feature Information
-          </h2>
 
-          <TextInput
-            label="Description"
-            value={form.feature.description}
-            onChange={(v) =>
-              (form.feature.description = v) && setForm({ ...form })
-            }
-            placeholder="Enter product description"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <TextInput
-              label="Feature Image URL"
-              value={form.feature.image}
-              onChange={(v) => (form.feature.image = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Feature Video URL"
-              value={form.feature.video}
-              onChange={(v) => (form.feature.video = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Feature PDF URL"
-              value={form.feature.pdf}
-              onChange={(v) => (form.feature.pdf = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
-          </div>
-        </div>
-        {/* specification Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-orange-500" />
-            specification Information
-          </h2>
+        <AdvantagesSection
+          form={form}
+          setForm={setForm}
+          addAdvantageType={addAdvantageType}
+          removeAdvantageType={removeAdvantageType}
+          addPoint={addPoint}
+          removePoint={removePoint}
+        />
 
-          <TextInput
-            label="Description"
-            value={form.specification.description}
-            onChange={(v) =>
-              (form.specification.description = v) && setForm({ ...form })
-            }
-            placeholder="Enter product description"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <TextInput
-              label="Specification Image URL"
-              value={form.specification.image}
-              onChange={(v) =>
-                (form.specification.image = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Specification Video URL"
-              value={form.specification.video}
-              onChange={(v) =>
-                (form.specification.video = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Specification PDF URL"
-              value={form.specification.pdf}
-              onChange={(v) =>
-                (form.specification.pdf = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-          </div>
-        </div>
-        {/* warranty Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-orange-500" />
-            warranty Information
-          </h2>
+        <FeatureSection
+          feature={form.feature}
+          setFeature={(data) => setForm({ ...form, feature: data })}
+        />
 
-          <TextInput
-            label="Description"
-            value={form.warranty.description}
-            onChange={(v) =>
-              (form.warranty.description = v) && setForm({ ...form })
-            }
-            placeholder="Enter product description"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <TextInput
-              label="Warranty Image URL"
-              value={form.warranty.image}
-              onChange={(v) =>
-                (form.warranty.image = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Warranty Video URL"
-              value={form.warranty.video}
-              onChange={(v) =>
-                (form.warranty.video = v) && setForm({ ...form })
-              }
-              placeholder="https://..."
-            />
-            <TextInput
-              label="Warranty PDF URL"
-              value={form.warranty.pdf}
-              onChange={(v) => (form.warranty.pdf = v) && setForm({ ...form })}
-              placeholder="https://..."
-            />
-          </div>
-        </div>
+        <SpecificationSection
+          specification={form.specification}
+          setSpecification={(data) => setForm({ ...form, specification: data })}
+        />
+
+        <WarrantySection
+          warranty={form.warranty}
+          setWarranty={(data) => setForm({ ...form, warranty: data })}
+        />
+
         {/* Submit Button */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <Button text="Submit Product" onClick={submit} icon={Package} />
+          <Button text="Submit Product" onClick={submit} icon={<Package />} loading={submitting}
+  disabled={submitting}  />
         </div>
       </div>
     </div>

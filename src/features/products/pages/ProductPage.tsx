@@ -5,10 +5,13 @@ import { fetchCategories } from "../../categories/categories.slice";
 import { fetchSubCategories } from "../../subcategories/subcategories.slice";
 import { Button } from "../../../components/common/Button/Button";
 import { ProductForm } from "../components/ProductForm";
-import { Search, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 const Swal = await import("sweetalert2");
+import { CommonTable } from "../../../components/common/Table/CommonTable";
+import { usePagination } from "../../../hooks/usePagination";
+import { Pagination } from "../../../components/common/Pagination/Pagination";
 
 export function ProductPage() {
   const dispatch = useAppDispatch();
@@ -19,11 +22,11 @@ export function ProductPage() {
   const categoriesArr = Array.isArray(categoriesState.data) ? categoriesState.data : [];
   const subcategoriesArr = Array.isArray(subcategoriesState.data) ? subcategoriesState.data : [];
 
-  console.log(productsArr)
 
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +34,6 @@ export function ProductPage() {
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   
   // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   
   // UI states
@@ -74,10 +76,13 @@ export function ProductPage() {
   }, [productsArr, searchTerm, selectedCategory, selectedSubcategory]);
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+const {
+  currentPage,
+  setCurrentPage,
+  totalPages,
+  paginatedData: currentProducts,
+} = usePagination(filteredProducts, itemsPerPage);
+  
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -119,7 +124,7 @@ export function ProductPage() {
   const handleFormSuccess = () => {
     setShowForm(false);
     dispatch(fetchProducts());
-    toast.success("Product saved successfully");
+    toast.success("Product edited successfully");
   };
 
   const clearFilters = () => {
@@ -131,23 +136,83 @@ export function ProductPage() {
   const hasActiveFilters =
     searchTerm !== "" || selectedCategory !== "all" || selectedSubcategory !== "all";
 
-  /* -------------------- Loading State -------------------- */
-  if (products.loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb8b1d]"></div>
-      </div>
-    );
-  }
+  /* -------------------- Product Columns Definition -------------------- */
+  const productColumns = useMemo(() => [
+    {
+      header: "Model No",
+      width: "15%",
+      render: (p: any) => (
+        <div className="font-medium text-gray-900 break-words">
+          {p.modelNo}
+        </div>
+      ),
+    },
+    {
+      header: "Category",
+      width: "15%",
+      render: (p: any) => p.category?.name || "-",
+    },
+    {
+      header: "Subcategory",
+      width: "15%",
+      render: (p: any) => p.subcategory?.name || "-",
+    },
+    {
+      header: "Description",
+      width: "30%",
+      render: (p: any) => (
+        <div className="max-w-[11rem] break-words" title={p.description}>
+          {p.description}
+        </div>
+      ),
+    },
+    {
+      header: "Active",
+      width: "10%",
+      render: (p: any) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            p.isActive
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {p.isActive ? "Yes" : "No"}
+        </span>
+      ),
+    },
+    {
+      header: "Actions",
+      align: "center" as const,
+      width: "15%",
+      render: (p: any) => (
+        <div className="flex justify-center gap-2">
+          <Button onClick={() => handleEdit(p)}>
+            Edit
+          </Button>
+          <Button onClick={() => handleDelete(p._id)}>
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
 
   /* -------------------- Render -------------------- */
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Loading State */}
+      {products.loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb8b1d]"></div>
+        </div>
+      ) : (
+        <>
+          {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Products</h1>
         <NavLink to="create">
-        <Button className="bg-[#eb8b1d] text-white hover:bg-[#d47a15] transition">
+        <Button>
           + Create Product
         </Button>
         </NavLink>
@@ -259,158 +324,25 @@ export function ProductPage() {
       {/* Results Info */}
       <div className="flex items-center justify-between text-sm text-gray-600 px-1">
         <span>
-          Showing {currentProducts.length === 0 ? 0 : startIndex + 1} to{" "}
-          {Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length}{" "}
-          products
+          Showing {currentProducts.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
         </span>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 table-fixed">
-            <thead className="bg-[#eb8b1d]">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                  Model No
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                  Subcategory
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/3">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/12">
-                  Active
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Filter className="w-12 h-12 text-gray-300" />
-                      <p className="text-gray-500 font-medium">No products found</p>
-                      <p className="text-sm text-gray-400">
-                        Try adjusting your filters or search term
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                currentProducts.map((p: any) => (
-                  <tr key={p._id} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[10rem] whitespace-normal break-words">
-  {p.modelNo}
-</td>
-                    <td className="px-6 py-4 text-sm text-gray-700 max-w-[8rem] whitespace-normal break-words">
-  {p.category?.name || "-"}
-</td>
-                  
-<td className="px-6 py-4 text-sm text-gray-700 max-w-[8rem] whitespace-normal break-words">
-  {p.subcategory?.name || "-"}
-</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <div className="max-w-[11rem] break-words whitespace-normal" title={p.description}>
-  {p.description}
-</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          p.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {p.isActive ? "Yes" : "No"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                      <div className="flex items-center justify-center gap-2">
-                        <Button
-                          onClick={() => handleEdit(p)}
-                          className="bg-[#b5ce07] text-black hover:bg-[#a3ba06] transition px-3 py-1"
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          onClick={() => handleDelete(p._id)}
-                          className="bg-red-500 text-white hover:bg-red-600 transition px-3 py-1"
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+     <CommonTable
+  columns={productColumns}
+  data={currentProducts}
+  loading={products.loading}
+  emptyMessage="No products found"
+/>
+
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Previous
-            </button>
-
-            <div className="flex items-center gap-2">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 text-sm font-medium rounded-lg transition ${
-                      currentPage === pageNum
-                        ? "bg-[#eb8b1d] text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              Next
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
+   <Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={setCurrentPage}
+/>
       {/* -------------------- Product Form Modal -------------------- */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
@@ -418,7 +350,7 @@ export function ProductPage() {
             <h2 className="text-2xl font-bold mb-4 text-gray-800">
               {selectedProduct ? "Edit Product" : "Create Product"}
             </h2>
-            <ProductForm product={selectedProduct} onSuccess={handleFormSuccess} />
+            <ProductForm  product={selectedProduct} onSuccess={handleFormSuccess} />
             <div className="mt-6 flex justify-end gap-2">
               <Button
                 onClick={() => setShowForm(false)}
@@ -429,6 +361,8 @@ export function ProductPage() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

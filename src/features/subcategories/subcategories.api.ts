@@ -36,7 +36,7 @@ export const updateSubCategoryAPI = async (
   id: string,
   payload: SubCategoryPayload
 ): Promise<SubCategory> => {
-  const res = await API.put(`/subcategories/${id}`, payload);
+  const res = await API.patch(`/subcategories/${id}`, payload);
   return res.data.data || res.data;
 };
 

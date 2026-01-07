@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { createSubCategory } from "../subcategories.slice";
 import { fetchCategories } from "../../categories/categories.slice";
 import toast from "react-hot-toast";
+import { Button } from "../../../components/common";
 
 export function SubCategoryForm() {
   const navigate = useNavigate();
@@ -30,6 +31,10 @@ export function SubCategoryForm() {
   // Image is provided as a URL string via the input below.
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+          try{
     if (!title.trim()) {
       toast.error("Title is required");
       return;
@@ -49,8 +54,6 @@ export function SubCategoryForm() {
       payload.image = image.trim();
     }
 
-    try {
-      setSubmitting(true);
       await dispatch(createSubCategory(payload)).unwrap();
       toast.success("Subcategory created successfully");
       navigate("/admin-dashboard/subcategory");
@@ -132,13 +135,14 @@ export function SubCategoryForm() {
 
         {/* Actions */}
         <div className="flex items-center gap-3 mt-6">
-          <button
+          <Button
             onClick={handleSubmit}
             disabled={submitting}
+             loading={submitting}
             className="bg-[#eb8b1d] text-white px-4 py-2 rounded hover:bg-[#d47a15]"
           >
-            Create
-          </button>
+            Create Subcategory
+          </Button>
           <button
             onClick={() => navigate(-1)}
             className="px-4 py-2 rounded border"

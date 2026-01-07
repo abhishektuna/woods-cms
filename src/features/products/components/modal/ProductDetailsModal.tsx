@@ -36,11 +36,37 @@ export function ProductDetailsModal({ product, onClose }: Props) {
 
         {/* BASIC INFO */}
         <div style={sectionStyle}>
+          <p><span style={labelStyle}>Product ID:</span> {product.productId}</p>
+          <p><span style={labelStyle}>Model No:</span> {product.modelNo}</p>
           <p><span style={labelStyle}>Category:</span> {product.category?.name}</p>
           <p><span style={labelStyle}>Subcategory:</span> {product.subcategory?.name}</p>
           <p><span style={labelStyle}>Description:</span> {product.description}</p>
           <p><span style={labelStyle}>Active:</span> {product.isActive ? "Yes" : "No"}</p>
         </div>
+
+        {/* PRODUCT TIRE KEYS */}
+        {product.product_tire_key && product.product_tire_key.length > 0 && (
+          <div style={sectionStyle}>
+            <p style={labelStyle}>Product Tire Keys</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+              {product.product_tire_key.map((key: string, index: number) => (
+                <span
+                  key={index}
+                  style={{
+                    backgroundColor: "#fed7aa",
+                    color: "#9a3412",
+                    padding: "4px 12px",
+                    borderRadius: 16,
+                    fontSize: 14,
+                    fontWeight: 500,
+                  }}
+                >
+                  {key}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* MEDIA */}
         <div style={sectionStyle}>
@@ -53,6 +79,27 @@ export function ProductDetailsModal({ product, onClose }: Props) {
         {/* ADVANTAGES */}
         <div style={sectionStyle}>
           <p style={labelStyle}>Advantages</p>
+          
+          {/* Advantages-level Media */}
+          {(product.advantages?.image || product.advantages?.video || product.advantages?.pdf) && (
+            <div style={{ marginTop: 8, marginBottom: 12 }}>
+              {product.advantages.image && (
+                <a href={product.advantages.image} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                  Advantages Image
+                </a>
+              )}
+              {product.advantages.video && (
+                <a href={product.advantages.video} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                  Advantages Video
+                </a>
+              )}
+              {product.advantages.pdf && (
+                <a href={product.advantages.pdf} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                  Advantages PDF
+                </a>
+              )}
+            </div>
+          )}
 
           {product.advantages?.type?.map((type: any, i: number) => (
             <div key={i} style={{ marginTop: 12 }}>
@@ -72,9 +119,21 @@ export function ProductDetailsModal({ product, onClose }: Props) {
                 >
                   <p><b>{pt.title}</b></p>
                   <p>{pt.description}</p>
-                  <a href={pt.image} target="_blank" style={linkStyle}>Image</a>
-                  <a href={pt.video} target="_blank" style={linkStyle}>Video</a>
-                  <a href={pt.pdf} target="_blank" style={linkStyle}>PDF</a>
+                  {pt.image && (
+                    <a href={pt.image} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                      Image
+                    </a>
+                  )}
+                  {pt.video && (
+                    <a href={pt.video} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                      Video
+                    </a>
+                  )}
+                  {pt.pdf && (
+                    <a href={pt.pdf} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                      PDF
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
@@ -85,10 +144,22 @@ export function ProductDetailsModal({ product, onClose }: Props) {
         {["feature", "specification", "warranty"].map((key) => (
           <div key={key} style={sectionStyle}>
             <p style={labelStyle}>{key.toUpperCase()}</p>
-            <p>{product[key]?.description}</p>
-            <a href={product[key]?.image} target="_blank" style={linkStyle}>Image</a>
-            <a href={product[key]?.video} target="_blank" style={linkStyle}>Video</a>
-            <a href={product[key]?.pdf} target="_blank" style={linkStyle}>PDF</a>
+            {product[key]?.description && <p>{product[key].description}</p>}
+            {product[key]?.image && (
+              <a href={product[key].image} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                Image
+              </a>
+            )}
+            {product[key]?.video && (
+              <a href={product[key].video} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                Video
+              </a>
+            )}
+            {product[key]?.pdf && (
+              <a href={product[key].pdf} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                PDF
+              </a>
+            )}
           </div>
         ))}
       </div>
