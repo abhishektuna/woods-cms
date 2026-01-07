@@ -11,6 +11,13 @@ export function SpecificationSection({ specification, setSpecification }: Props)
       <h2 className="text-xl font-bold text-gray-800 mb-6">Specifications</h2>
 
       <TextInput
+        label="Title"
+        value={specification.title}
+        onChange={(v) => setSpecification({ ...specification, title: v })}
+        placeholder="Enter specification title"
+      />
+
+      <TextInput
         label="Description"
         value={specification.description}
         onChange={(v) => setSpecification({ ...specification, description: v })}

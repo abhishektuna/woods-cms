@@ -11,6 +11,13 @@ export function FeatureSection({ feature, setFeature }: Props) {
       <h2 className="text-xl font-bold text-gray-800 mb-6">Features</h2>
 
       <TextInput
+        label="Title"
+        value={feature.title}
+        onChange={(v) => setFeature({ ...feature, title: v })}
+        placeholder="Enter feature title"
+      />
+
+      <TextInput
         label="Description"
         value={feature.description}
         onChange={(v) => setFeature({ ...feature, description: v })}

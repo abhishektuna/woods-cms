@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+
 
 const AdminHome = () => {
   return (
@@ -10,7 +10,7 @@ const AdminHome = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[
                 { label: "Total Users", value: "2,543", change: "+12%", color: "#eb8b1d" },
                 { label: "Revenue", value: "$45,231", change: "+8%", color: "#b5ce07" },
@@ -47,10 +47,10 @@ const AdminHome = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* Content Card */}
-            <div className="bg-white rounded-xl p-6 shadow-md">
+            {/* <div className="bg-white rounded-xl p-6 shadow-md">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((item) => (
@@ -90,7 +90,7 @@ const AdminHome = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
   );
 };

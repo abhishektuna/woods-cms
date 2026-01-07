@@ -30,9 +30,9 @@ export default function ProductForm() {
       pdf: "",
       type: [],
     },
-    feature: { description: "", image: "", video: "", pdf: "" },
-    specification: { description: "", image: "", video: "", pdf: "" },
-    warranty: { description: "", image: "", video: "", pdf: "" },
+    feature: { title: "", description: "", image: "", video: "", pdf: "" },
+    specification: { title: "", description: "", image: "", video: "", pdf: "" },
+    warranty: { title: "", description: "", image: "", video: "", pdf: "" },
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -225,18 +225,21 @@ export default function ProductForm() {
           type: advantagesMeta,
         },
         feature: {
+          title: form.feature?.title || "",
           description: form.feature?.description || "",
           image: form.feature?.image || "",
           video: form.feature?.video || "",
           pdf: form.feature?.pdf || "",
         },
         specification: {
+          title: form.specification?.title || "",
           description: form.specification?.description || "",
           image: form.specification?.image || "",
           video: form.specification?.video || "",
           pdf: form.specification?.pdf || "",
         },
         warranty: {
+          title: form.warranty?.title || "",
           description: form.warranty?.description || "",
           image: form.warranty?.image || "",
           video: form.warranty?.video || "",

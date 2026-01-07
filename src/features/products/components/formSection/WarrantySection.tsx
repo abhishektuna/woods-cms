@@ -11,6 +11,13 @@ export function WarrantySection({ warranty, setWarranty }: Props) {
       <h2 className="text-xl font-bold text-gray-800 mb-6">Warranty</h2>
 
       <TextInput
+        label="Title"
+        value={warranty.title}
+        onChange={(v) => setWarranty({ ...warranty, title: v })}
+        placeholder="Enter warranty title"
+      />
+
+      <TextInput
         label="Description"
         value={warranty.description}
         onChange={(v) => setWarranty({ ...warranty, description: v })}
