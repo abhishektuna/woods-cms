@@ -45,11 +45,11 @@ export function ProductDetailsModal({ product, onClose }: Props) {
         </div>
 
         {/* PRODUCT TIRE KEYS */}
-        {product.product_tire_key && product.product_tire_key.length > 0 && (
+        {product.product_tire_key_new && product.product_tire_key_new.length > 0 && (
           <div style={sectionStyle}>
             <p style={labelStyle}>Product Tire Keys</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-              {product.product_tire_key.map((key: string, index: number) => (
+              {product.product_tire_key_new.map((key: string, index: number) => (
                 <span
                   key={index}
                   style={{

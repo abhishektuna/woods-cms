@@ -6,6 +6,7 @@ import authReducer from "../features/auth/auth.slice";
 import categoriesReducer from "../features/categories/categories.slice";
 import subcategoriesReducer from "../features/subcategories/subcategories.slice";
 import productsReducer from "../features/products/products.slice";
+import productTireKeyReducer from "../features/products/productTireKey.slice";
 
 export const rootReducer = combineReducers({
   auth: authReducer,
@@ -13,6 +14,7 @@ export const rootReducer = combineReducers({
   categories: categoriesReducer,
   subcategories: subcategoriesReducer,
   products: productsReducer,
+  productTireKeys: productTireKeyReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

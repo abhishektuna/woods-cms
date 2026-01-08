@@ -2,6 +2,7 @@ import { useState, type FormEvent, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchCategories } from "../../../features/categories/categories.slice";
 import { fetchSubCategories } from "../../../features/subcategories/subcategories.slice";
+import { fetchProductTireKeys } from "../productTireKey.slice";
 import { updateProduct } from "../products.slice";
 import { Button, Input, Textarea } from "../../../components/common/index";
 
@@ -42,6 +43,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   const dispatch = useAppDispatch();
   const categories = useAppSelector((state) => state.categories);
   const subcategories = useAppSelector((state) => state.subcategories);
+  const tireKeys = useAppSelector((state: any) => state.productTireKeys?.data || []);
 
   /* -------------------- Form State -------------------- */
   const [modelNo, setModelNo] = useState(product?.modelNo || "");
@@ -55,8 +57,9 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     product?.subcategory?.id || ""
   );
   const [description, setDescription] = useState(product?.description || "");
-  const [productTireKey, setProductTireKey] = useState<string[]>(product?.product_tire_key || []);
-  const [tireKeyInput, setTireKeyInput] = useState("");
+  const [productTireKey, setProductTireKey] = useState<string>(
+    product?.product_tire_key_new?._id || product?.product_tire_key_new || ""
+  );
   const [advantages, setAdvantages] = useState<AdvantagesBlock>(
     product?.advantages || { image: "", video: "", pdf: "", type: [] }
   );
@@ -69,6 +72,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
+    dispatch(fetchProductTireKeys());
   }, [dispatch]);
 
   /* -------------------- Handlers -------------------- */
@@ -122,7 +126,7 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
       categoryModel,
       categoryRef,
       description,
-      product_tire_key: productTireKey,
+      product_tire_key_new: productTireKey || null,
       advantages,
       feature,
       specification,
@@ -131,17 +135,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     };
 
     dispatch(updateProduct({ id: product._id, payload })).then(onSuccess);
-  };
-
-  const handleAddTireKey = () => {
-    if (tireKeyInput.trim() && !productTireKey.includes(tireKeyInput.trim())) {
-      setProductTireKey([...productTireKey, tireKeyInput.trim()]);
-      setTireKeyInput("");
-    }
-  };
-
-  const handleRemoveTireKey = (index: number) => {
-    setProductTireKey(productTireKey.filter((_, i) => i !== index));
   };
 
   const handleAdvantagePointChange = (
@@ -252,39 +245,73 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
             {/* Description */}
             <Textarea label="Description" value={description} onChange={(e: any) => setDescription(e.target.value)} />
 
-            {/* Tire Keys */}
+            {/* Tire Key */}
             <div className="border-2 border-gray-200 rounded-xl p-6 hover:border-[#b5ce07] transition-colors">
-              <h2 className="text-xl font-bold text-gray-800 mb-5">Product Tire Keys</h2>
-              <div className="flex gap-3 mb-4">
-                <div className="flex-1">
-                  <Input
-                    label=""
-                    value={tireKeyInput}
-                    onChange={(e: any) => setTireKeyInput(e.target.value)}
-                    onKeyPress={(e: any) => e.key === "Enter" && (e.preventDefault(), handleAddTireKey())}
-                    placeholder="Enter tire key"
-                  />
-                </div>
-                <Button type="button" onClick={handleAddTireKey} className="bg-[#b5ce07] text-black mt-auto">
-                  Add Key
-                </Button>
-              </div>
-              {productTireKey.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {productTireKey.map((key, index) => (
-                    <div key={index} className="inline-flex items-center bg-[#eb8b1d]/10 border border-[#eb8b1d]/30 text-[#eb8b1d] px-4 py-2 rounded-full font-medium shadow-sm">
-                      <span>{key}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTireKey(index)}
-                        className="ml-2 text-[#eb8b1d] hover:text-red-600 font-bold text-lg"
-                      >
-                        ×
-                      </button>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Product Tire Key</h2>
+              <p className="text-sm text-gray-600 mb-6">Select the tire type and color for this product</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {tireKeys.map((tk: any) => (
+                  <button
+                    key={tk._id}
+                    type="button"
+                    onClick={() => setProductTireKey(tk._id)}
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      productTireKey === tk._id
+                        ? "border-[#b5ce07] bg-[#b5ce07]/10 shadow-md"
+                        : "border-gray-200 bg-white hover:border-[#b5ce07]/50 hover:shadow-sm"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-full border-2 border-white shadow-md flex-shrink-0"
+                        style={{ backgroundColor: tk.color || "#cccccc" }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">{tk.type}</p>
+                        <p className="text-xs text-gray-500 mt-1">{tk.color || "No color"}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    
+                    {productTireKey === tk._id && (
+                      <div className="absolute top-2 right-2">
+                        <svg className="w-5 h-5 text-[#b5ce07]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+                
+                {/* None Option */}
+                <button
+                  type="button"
+                  onClick={() => setProductTireKey("")}
+                  className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                    !productTireKey
+                      ? "border-[#b5ce07] bg-[#b5ce07]/10 shadow-md"
+                      : "border-gray-200 bg-white hover:border-[#b5ce07]/50 hover:shadow-sm"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0 bg-gray-50">
+                      <span className="text-gray-400 text-xl">−</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">None</p>
+                      <p className="text-xs text-gray-500 mt-1">No tire key</p>
+                    </div>
+                  </div>
+                  
+                  {!productTireKey && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-[#b5ce07]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Advantages */}

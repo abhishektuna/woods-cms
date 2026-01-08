@@ -6,13 +6,18 @@ import {
 } from "../subcategories.slice";
 import { fetchCategories } from "../../categories/categories.slice";
 import { Button } from "../../../components/common/Button/Button";
-import { Search,Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import toast from "react-hot-toast";
 const Swal = await import("sweetalert2");
 import { CommonTable } from "../../../components/common/Table/CommonTable";
+import { Modal } from "../../../components/common/Modal/Modal";
+import { ViewModal } from "../../../components/common/ViewModal/ViewModal";
+import { ActionButton } from "../../../components/common/ActionButton/ActionButton";
+import { SearchBar } from "../../../components/common/SearchBar/SearchBar";
 import { usePagination } from "../../../hooks/usePagination";
 import { Pagination } from "../../../components/common/Pagination/Pagination";
 import { SubCategoryModalForm } from "../components/Modal/SubCategoryModalForm";
+import { SubCategoryView } from "../components/SubCategoryView";
 import { useNavigate } from "react-router-dom";
 
 export function SubCategoryPage() {
@@ -25,6 +30,10 @@ export function SubCategoryPage() {
 
   const [showForm, setShowForm] = useState(false);
 const [selectedSubCategory, setSelectedSubCategory] = useState<any>(null);
+
+// View states
+const [showViewModal, setShowViewModal] = useState(false);
+const [viewingSubCategory, setViewingSubCategory] = useState<any>(null);
 
 const navigate = useNavigate();
 
@@ -74,6 +83,11 @@ const navigate = useNavigate();
   setShowForm(true);
 };
 
+  const handleView = (subCategory: any) => {
+  setViewingSubCategory(subCategory);
+  setShowViewModal(true);
+};
+
   const handleCreate = () => {
   navigate("create");
 };
@@ -113,9 +127,9 @@ const navigate = useNavigate();
   const subCategoryColumns = useMemo(() => [
   {
     header: "Title",
-    width: "30%",
+    width: "35%",
     render: (s: any) => (
-      <div className="font-medium text-gray-900 break-words max-w-xs">
+      <div className="font-medium text-gray-900 truncate" title={s.title}>
         {s.title}
       </div>
     ),
@@ -128,35 +142,33 @@ const navigate = useNavigate();
         <img
           src={s.image}
           alt={s.title}
-          className="w-20 h-12 object-cover rounded"
+          className="w-20 h-12 object-cover rounded-lg shadow-sm"
         />
       ) : (
-        "-"
+        <span className="text-gray-400 text-sm">No image</span>
       ),
   },
   {
     header: "Category",
     width: "25%",
-    render: (s: any) =>
-      categoriesArr.find((c: any) => c._id === s.categoryId)?.title || "-",
+    render: (s: any) => {
+      const categoryTitle = categoriesArr.find((c: any) => c._id === s.categoryId)?.title || "-";
+      return (
+        <div className="truncate" title={categoryTitle}>
+          {categoryTitle}
+        </div>
+      );
+    },
   },
   {
     header: "Actions",
     align: "center" as const,
-    width: "25%",
+    width: "20%",
     render: (s: any) => (
-      <div className="flex justify-center gap-2">
-        <Button
-          onClick={() => handleEdit(s)}
-        >
-          Edit
-        </Button>
-
-        <Button
-          onClick={() => handleDelete(s._id)}
-        >
-          Delete
-        </Button>
+      <div className="flex justify-center gap-1.5">
+        <ActionButton action="view" onClick={() => handleView(s)} />
+        <ActionButton action="edit" onClick={() => handleEdit(s)} />
+        <ActionButton action="delete" onClick={() => handleDelete(s._id)} />
       </div>
     ),
   },
@@ -184,16 +196,11 @@ const navigate = useNavigate();
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Search Bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search subcategories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#eb8b1d] focus:border-transparent outline-none transition"
-            />
-          </div>
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search subcategories..."
+          />
 
           {/* Filter Toggle Button */}
           <button
@@ -270,26 +277,39 @@ const navigate = useNavigate();
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </>
       )}
-      {/* -------------------- SubCategory Form Modal -------------------- */}
-{showForm && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
-    <div className="bg-white p-6 rounded-lg shadow-xl w-11/12 md:w-4/5 lg:w-3/5 max-h-[90vh] overflow-y-auto my-8">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">
-        {selectedSubCategory ? "Edit Subcategory" : "Create Subcategory"}
-      </h2>
+      {/* -------------------- SubCategory View Modal -------------------- */}
+      {showViewModal && (
+        <ViewModal
+          isOpen={showViewModal}
+          onClose={() => setShowViewModal(false)}
+          title={`${viewingSubCategory?.title || "Subcategory"} Details`}
+          size="md"
+        >
+          <SubCategoryView subCategory={viewingSubCategory} categories={categoriesArr} />
+        </ViewModal>
+      )}
 
-      <SubCategoryModalForm
-        subCategory={selectedSubCategory}
-        categories={categoriesArr}
-        onCancel={() => setShowForm(false)}
-        onSuccess={() => {
-          setShowForm(false);
-          dispatch(fetchSubCategories());
-        }}
-      />
-    </div>
-  </div>
-)}
+      {/* -------------------- SubCategory Form Modal -------------------- */}
+      {showForm && (
+        <Modal
+          isOpen={showForm}
+          onClose={() => setShowForm(false)}
+          title={selectedSubCategory ? "Edit Subcategory" : "Create Subcategory"}
+          size="md"
+        >
+          <div className="p-6">
+            <SubCategoryModalForm
+              subCategory={selectedSubCategory}
+              categories={categoriesArr}
+              onCancel={() => setShowForm(false)}
+              onSuccess={() => {
+                setShowForm(false);
+                dispatch(fetchSubCategories());
+              }}
+            />
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

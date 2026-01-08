@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, Plus, Package } from "lucide-react";
+import { Package } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchCategories } from "../../categories/categories.slice";
@@ -13,6 +13,7 @@ import { AdvantagesSection } from "../components/formSection/AdvantagesSection";
 import { FeatureSection } from "../components/formSection/FeatureSection";
 import { SpecificationSection } from "../components/formSection/SpecificationSection";
 import { WarrantySection } from "../components/formSection/WarrantySection";
+import { fetchProductTireKeys } from "../productTireKey.slice";
 
 // Main Product Form
 export default function ProductForm() {
@@ -22,7 +23,7 @@ export default function ProductForm() {
     categoryRef: "",
     description: "",
     isActive: true,
-    product_tire_key: [],
+    product_tire_key_new: "",
     product: { image: "", video: "", pdf: "" },
     advantages: {
       image: "",
@@ -35,9 +36,13 @@ export default function ProductForm() {
     warranty: { title: "", description: "", image: "", video: "", pdf: "" },
   });
 
-  const [submitting, setSubmitting] = useState(false);
 
-  const [tireKeyInput, setTireKeyInput] = useState("");
+  const tireKeys = useAppSelector(
+    (state: any) => state.productTireKeys?.data || []
+  );
+
+
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Track selected option ids separately so we can store titles/ids in the form fields as required
@@ -74,23 +79,8 @@ export default function ProductForm() {
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
+    dispatch(fetchProductTireKeys());
   }, [dispatch]);
-
-  const addTireKey = () => {
-    if (
-      tireKeyInput.trim() &&
-      !form.product_tire_key.includes(tireKeyInput.trim())
-    ) {
-      form.product_tire_key.push(tireKeyInput.trim());
-      setForm({ ...form });
-      setTireKeyInput("");
-    }
-  };
-
-  const removeTireKey = (index: number) => {
-    form.product_tire_key.splice(index, 1);
-    setForm({ ...form });
-  };
 
   const addAdvantageType = () => {
     form.advantages.type.push({
@@ -213,7 +203,7 @@ export default function ProductForm() {
         image: form.product?.image || "",
         video: form.product?.video || "",
         pdf: form.product?.pdf || "",
-        product_tire_key: form.product_tire_key || [],
+        product_tire_key_new: form.product_tire_key_new || null,
         categoryType: categoryTypeNormalized,
         categoryModel: categoryModel,
         categoryRef: categoryRefNormalized,
@@ -301,38 +291,75 @@ export default function ProductForm() {
           onSubcategoryChange={handleSubcategoryChange}
         />
 
-        {/* Product Tire Keys */}
+        {/* Product Tire Key */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Product Tire Keys</h2>
-          <div className="flex gap-2 mb-3">
-            <input
-              value={tireKeyInput}
-              onChange={(e) => setTireKeyInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && addTireKey()}
-              placeholder="e.g., tire-key-1"
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none"
-            />
-            <Button text="Add" onClick={addTireKey} icon={<Plus />} />
-          </div>
-          {form.product_tire_key.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {form.product_tire_key.map((key: string, index: number) => (
-                <div
-                  key={index}
-                  className="inline-flex items-center bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-sm font-medium"
-                >
-                  <span>{key}</span>
-                  <button
-                    onClick={() => removeTireKey(index)}
-                    className="ml-2 text-orange-600 hover:text-orange-800 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Product Tire Key</h2>
+          <p className="text-sm text-gray-600 mb-6">Select the tire type and color for this product</p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tireKeys.map((tk: any) => (
+              <button
+                key={tk._id}
+                type="button"
+                onClick={() => setForm({ ...form, product_tire_key_new: tk._id })}
+                className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                  form.product_tire_key_new === tk._id
+                    ? "border-orange-500 bg-orange-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-orange-300 hover:shadow-sm"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full border-2 border-white shadow-md flex-shrink-0"
+                    style={{ backgroundColor: tk.color || "#cccccc" }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{tk.type}</p>
+                    <p className="text-xs text-gray-500 mt-1">{tk.color || "No color"}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+                
+                {form.product_tire_key_new === tk._id && (
+                  <div className="absolute top-2 right-2">
+                    <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            ))}
+            
+            {/* None Option */}
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, product_tire_key_new: "" })}
+              className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                !form.product_tire_key_new
+                  ? "border-orange-500 bg-orange-50 shadow-md"
+                  : "border-gray-200 bg-white hover:border-orange-300 hover:shadow-sm"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0 bg-gray-50">
+                  <span className="text-gray-400 text-xl">−</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">None</p>
+                  <p className="text-xs text-gray-500 mt-1">No tire key</p>
+                </div>
+              </div>
+              
+              {!form.product_tire_key_new && (
+                <div className="absolute top-2 right-2">
+                  <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
+
 
         <AdvantagesSection
           form={form}

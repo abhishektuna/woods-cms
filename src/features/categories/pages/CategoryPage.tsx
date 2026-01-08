@@ -2,11 +2,16 @@ import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchCategories, deleteCategory } from "../categories.slice";
 import { Button } from "../../../components/common/Button/Button";
-import { Search, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { CategoryForm } from "../components/CategoryForm";
+import { CategoryView } from "../components/CategoryView";
 const Swal = await import("sweetalert2");
 import { CommonTable } from "../../../components/common/Table/CommonTable";
+import { Modal } from "../../../components/common/Modal/Modal";
+import { ViewModal } from "../../../components/common/ViewModal/ViewModal";
+import { ActionButton } from "../../../components/common/ActionButton/ActionButton";
+import { SearchBar } from "../../../components/common/SearchBar/SearchBar";
 import { usePagination } from "../../../hooks/usePagination";
 import { Pagination } from "../../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +31,10 @@ export function CategoryPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedCategoryItem, setSelectedCategoryItem] = useState<any>(null);
+
+  // View states
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingCategory, setViewingCategory] = useState<any>(null);
 
   /* -------------------- Fetch Products -------------------- */
   useEffect(() => {
@@ -58,6 +67,11 @@ const navigate = useNavigate();
   const handleEdit = (categoryItem: any) => {
     setSelectedCategoryItem(categoryItem);
     setShowForm(true);
+  };
+
+  const handleView = (category: any) => {
+    setViewingCategory(category);
+    setShowViewModal(true);
   };
 
   const handleCreate = () => {
@@ -102,9 +116,9 @@ const navigate = useNavigate();
   const categoryColumns = useMemo(() => [
   {
     header: "Title",
-    width: "40%",
+    width: "45%",
     render: (c: any) => (
-      <div className="text-sm font-medium text-gray-900 break-words max-w-xs">
+      <div className="text-sm font-medium text-gray-900 truncate" title={c.title}>
         {c.title}
       </div>
     ),
@@ -117,29 +131,21 @@ const navigate = useNavigate();
         <img
           src={c.image}
           alt={c.title}
-          className="w-20 h-12 object-cover rounded"
+          className="w-20 h-12 object-cover rounded-lg shadow-sm"
         />
       ) : (
-        "-"
+        <span className="text-gray-400 text-sm">No image</span>
       ),
   },
   {
     header: "Actions",
     align: "center" as const,
-    width: "30%",
+    width: "25%",
     render: (c: any) => (
-      <div className="flex justify-center gap-2">
-        <Button
-          onClick={() => handleEdit(c)}
-        >
-          Edit
-        </Button>
-
-        <Button
-          onClick={() => handleDelete(c._id)}
-        >
-          Delete
-        </Button>
+      <div className="flex justify-center gap-1.5">
+        <ActionButton action="view" onClick={() => handleView(c)} />
+        <ActionButton action="edit" onClick={() => handleEdit(c)} />
+        <ActionButton action="delete" onClick={() => handleDelete(c._id)} />
       </div>
     ),
   },
@@ -167,16 +173,11 @@ const navigate = useNavigate();
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Search Bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search by title..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#eb8b1d] focus:border-transparent outline-none transition"
-            />
-          </div>
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search by title..."
+          />
 
           {/* Filter Toggle Button */}
           <button
@@ -244,16 +245,30 @@ const navigate = useNavigate();
       {/* Pagination */}
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
+      {/* -------------------- Category View Modal -------------------- */}
+      {showViewModal && (
+        <ViewModal
+          isOpen={showViewModal}
+          onClose={() => setShowViewModal(false)}
+          title={`${viewingCategory?.title || "Category"} Details`}
+          size="md"
+        >
+          <CategoryView category={viewingCategory} />
+        </ViewModal>
+      )}
+
       {/* -------------------- Category Form Modal -------------------- */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-11/12 md:w-4/5 lg:w-3/5 max-h-[90vh] overflow-y-auto my-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
-              {selectedCategoryItem ? "Edit Category" : "Create Category"}
-            </h2>
+        <Modal
+          isOpen={showForm}
+          onClose={() => setShowForm(false)}
+          title={selectedCategoryItem ? "Edit Category" : "Create Category"}
+          size="md"
+        >
+          <div className="p-6">
             <CategoryForm category={selectedCategoryItem} onSuccess={handleFormSuccess} onCancel={() => setShowForm(false)} />
           </div>
-        </div>
+        </Modal>
       )}
         </>
       )}
