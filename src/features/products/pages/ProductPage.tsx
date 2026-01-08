@@ -176,7 +176,11 @@ export function ProductPage() {
         header: "Category",
         width: "15%",
         render: (p: any) => (
+<<<<<<< HEAD
+          <div className="line-clamp-2 truncate" title={p.category?.name}>
+=======
           <div className="truncate" title={p.category?.name}>
+>>>>>>> e796990912641f753bd0ee40930a355e4f412b3a
             {p.category?.name || "-"}
           </div>
         ),
@@ -185,12 +189,18 @@ export function ProductPage() {
         header: "Subcategory",
         width: "15%",
         render: (p: any) => (
+<<<<<<< HEAD
+          <div className="line-clamp-2 truncate" title={p.subcategory?.name}>
+=======
           <div className="truncate" title={p.subcategory?.name}>
+>>>>>>> e796990912641f753bd0ee40930a355e4f412b3a
             {p.subcategory?.name || "-"}
           </div>
         ),
       },
       {
+<<<<<<< HEAD
+=======
         header: "Description",
         width: "30%",
         render: (p: any) => (
@@ -200,6 +210,7 @@ export function ProductPage() {
         ),
       },
       {
+>>>>>>> e796990912641f753bd0ee40930a355e4f412b3a
         header: "Actions",
         align: "center" as const,
         width: "15%",
