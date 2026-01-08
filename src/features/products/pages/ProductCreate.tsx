@@ -315,11 +315,7 @@ export default function ProductForm() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 truncate">{tk.type}</p>
-<<<<<<< HEAD
                     {/* <p className="text-xs text-gray-500 mt-1">{tk.color || "No color"}</p> */}
-=======
-                    <p className="text-xs text-gray-500 mt-1">{tk.color || "No color"}</p>
->>>>>>> e796990912641f753bd0ee40930a355e4f412b3a
                   </div>
                 </div>
                 
