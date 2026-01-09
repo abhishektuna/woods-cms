@@ -126,13 +126,13 @@ export function CategoryForm({ category, onSuccess, onCancel }: any) {
 
         <div className="flex justify-end gap-2 mt-6">
           {onCancel && (
-            <button 
+            <Button 
               type="button" 
               onClick={onCancel} 
-              className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+              className="px-4 py-2  rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
             >
               Cancel
-            </button>
+            </Button>
           )}
           <Button 
             type="submit"

@@ -47,7 +47,7 @@ export function ActionButton({
       onClick={onClick}
       title={title || config.label}
       aria-label={title || config.label}
-      className={`inline-flex items-center justify-center ${padding} ${config.color} rounded-lg transition-all duration-200 group`}
+      className={`cursor-pointer inline-flex items-center justify-center ${padding} ${config.color} rounded-lg transition-all duration-200 group`}
     >
       <Icon className={`${iconSize} group-hover:scale-110 transition-transform`} />
     </button>

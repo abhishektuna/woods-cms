@@ -141,12 +141,6 @@ export function SubCategoryForm() {
           >
             Create Subcategory
           </Button>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 rounded border"
-          >
-            Cancel
-          </button>
         </div>
       </div>
     </div>
