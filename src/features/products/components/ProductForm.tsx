@@ -143,11 +143,17 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     field: keyof AdvantagePoint,
     value: string
   ) => {
-    const newAdv = [...advantages.type];
-    newAdv[advIndex].points[pointIndex] = {
-      ...newAdv[advIndex].points[pointIndex],
-      [field]: value
-    };
+    const newAdv = advantages.type.map((adv, idx) => {
+      if (idx === advIndex) {
+        return {
+          ...adv,
+          points: adv.points.map((point, pIdx) => 
+            pIdx === pointIndex ? { ...point, [field]: value } : point
+          )
+        };
+      }
+      return adv;
+    });
     setAdvantages({ ...advantages, type: newAdv });
   };
 
@@ -343,8 +349,9 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
                     label="Advantage Title"
                     value={adv.title}
                     onChange={(e: any) => {
-                      const newAdv = [...advantages.type];
-                      newAdv[advIndex].title = e.target.value;
+                      const newAdv = advantages.type.map((item, idx) => 
+                        idx === advIndex ? { ...item, title: e.target.value } : item
+                      );
                       setAdvantages({ ...advantages, type: newAdv });
                     }}
                   />
