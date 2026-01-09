@@ -16,7 +16,6 @@ export function SubCategoryForm() {
     ? categories.data
     : categories?.data || [];
 
-    console.log(categoriesArr)
   const [title, setTitle] = useState("");
   // store image as URL (string)
   const [image, setImage] = useState<string>("");
@@ -69,12 +68,11 @@ export function SubCategoryForm() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Create Subcategory</h2>
-        <button
-          className="text-sm text-gray-600 hover:text-gray-800"
+        <Button
+          text="Back"
           onClick={() => navigate(-1)}
-        >
-          Back
-        </button>
+          className="!bg-gray-100 !text-gray-700 hover:!bg-gray-200"
+        />
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-sm">

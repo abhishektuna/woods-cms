@@ -52,86 +52,96 @@ const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
     setExpandedMenu(expandedMenu === label ? null : label);
   };
 
-  return (
+ return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay with enhanced backdrop blur */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setIsOpen(false)}
           style={{
+            background: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(8px)",
             animation: "fadeIn 0.3s ease-in-out"
           }}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar with enhanced styling */}
       <div
         className={`fixed top-0 left-0 h-screen z-50 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0`}
         style={{
           width: "280px",
-          background: "linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%)",
-          boxShadow: "4px 0 24px rgba(0, 0, 0, 0.15)"
+          background: "linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #262626 100%)",
+          boxShadow: "8px 0 32px rgba(0, 0, 0, 0.4), inset -1px 0 0 rgba(255, 255, 255, 0.05)",
+          borderRight: "1px solid rgba(255, 255, 255, 0.08)"
         }}
       >
-        {/* Header */}
+        {/* Header with enhanced gradient and glow */}
         <div
-          className="flex items-center justify-between p-6 border-b"
+          className="flex items-center justify-between p-6 border-b relative"
           style={{
-            borderColor: "rgba(255, 255, 255, 0.1)"
+            borderColor: "rgba(255, 255, 255, 0.08)",
+            background: "linear-gradient(135deg, rgba(235, 139, 29, 0.05) 0%, transparent 100%)"
           }}
         >
-          <Link to="/dashboard" className="flex items-center gap-3">
+          <Link to="/dashboard" className="flex items-center gap-3 group">
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-xl"
+              className="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-white text-xl transition-all duration-300 group-hover:scale-110"
               style={{
                 background: "linear-gradient(135deg, #eb8b1d 0%, #d97a16 100%)",
-                boxShadow: "0 4px 12px rgba(235, 139, 29, 0.3)"
+                boxShadow: "0 8px 24px rgba(235, 139, 29, 0.4), 0 0 40px rgba(235, 139, 29, 0.2)",
+                border: "1px solid rgba(255, 255, 255, 0.2)"
               }}
             >
               A
             </div>
             <div>
-              <h2 className="text-white font-bold text-lg">Admin Panel</h2>
-              {/* <p className="text-gray-400 text-xs">Dashboard v2.0</p> */}
+              <h2 className="text-white font-bold text-lg tracking-tight">Admin Panel</h2>
+              <p className="text-gray-400 text-xs mt-0.5">Management System</p>
             </div>
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden text-gray-400 hover:text-white transition-colors"
+            className="lg:hidden text-gray-400 hover:text-white transition-all duration-200 hover:rotate-90 hover:scale-110"
           >
             <X size={24} />
           </button>
         </div>
 
-        {/* Search Bar */}
+        {/* Enhanced Search Bar with glow effect */}
         <div className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <div className="relative group">
+            <Search 
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors duration-200 group-focus-within:text-orange-400" 
+              size={18} 
+            />
             <input
               type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-400 focus:outline-none focus:border-opacity-20 transition-all"
+              placeholder="Search menu..."
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white bg-opacity-5 border border-white border-opacity-10 text-white placeholder-gray-500 focus:outline-none transition-all duration-300"
               style={{
                 backdropFilter: "blur(10px)"
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "#eb8b1d";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(235, 139, 29, 0.1)";
+                e.currentTarget.style.background = "rgba(235, 139, 29, 0.08)";
+                e.currentTarget.style.boxShadow = "0 0 0 4px rgba(235, 139, 29, 0.15), 0 8px 16px rgba(235, 139, 29, 0.1)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
           </div>
         </div>
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu with enhanced effects */}
         <nav className="flex-1 overflow-y-auto px-4 pb-4" style={{ maxHeight: "calc(100vh - 280px)" }}>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isExpanded = expandedMenu === item.label;
@@ -144,69 +154,83 @@ const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
                     item.subItems!.some((s) => pathname.startsWith(s.path))
                   );
                 }
-
                 return pathname === item.path;
               };
 
               return (
-                <div key={item.label}>
-                  {/* If item has no subitems, use NavLink to navigate */}
+                <div key={item.label} className="relative">
                   {!hasSubItems ? (
                     <NavLink
                       to={item.path}
-                      className="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden"
                       style={({ isActive: navActive }) => ({
-                        background: navActive ? "linear-gradient(135deg, #eb8b1d 0%, #d97a16 100%)" : "transparent",
+                        background: navActive 
+                          ? "linear-gradient(135deg, #eb8b1d 0%, #d97a16 100%)" 
+                          : "transparent",
                         color: navActive ? "white" : "#9ca3af",
-                        transform: navActive ? "translateX(4px)" : "translateX(0)"
+                        transform: navActive ? "translateX(6px)" : "translateX(0)",
+                        boxShadow: navActive 
+                          ? "0 8px 24px rgba(235, 139, 29, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset"
+                          : "none"
                       })}
                       onMouseEnter={(e) => {
-                        // preserve hover effect
-                        e.currentTarget.style.background = e.currentTarget.getAttribute("data-active") === "true" ? e.currentTarget.style.background : "rgba(255, 255, 255, 0.05)";
-                        e.currentTarget.style.color = e.currentTarget.getAttribute("data-active") === "true" ? e.currentTarget.style.color : "white";
+                        if (e.currentTarget.getAttribute("aria-current") !== "page") {
+                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                          e.currentTarget.style.color = "white";
+                          e.currentTarget.style.transform = "translateX(4px)";
+                        }
                       }}
                       onMouseLeave={(e) => {
                         const active = e.currentTarget.getAttribute("aria-current") === "page";
                         if (!active) {
                           e.currentTarget.style.background = "transparent";
                           e.currentTarget.style.color = "#9ca3af";
+                          e.currentTarget.style.transform = "translateX(0)";
                         }
                       }}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon size={20} />
-                        <span className="font-medium">{item.label}</span>
+                      <div className="flex items-center gap-3.5">
+                        <Icon size={20} className="group-hover:scale-110 transition-transform duration-200" />
+                        <span className="font-medium text-[15px]">{item.label}</span>
                       </div>
                     </NavLink>
                   ) : (
                     <button
                       onClick={() => toggleSubmenu(item.label)}
-                      className="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group"
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden"
                       style={{
-                        background: isItemActive(window.location.pathname) ? "linear-gradient(135deg, #eb8b1d 0%, #d97a16 100%)" : "transparent",
+                        background: isItemActive(window.location.pathname) 
+                          ? "linear-gradient(135deg, #eb8b1d 0%, #d97a16 100%)" 
+                          : "transparent",
                         color: isItemActive(window.location.pathname) ? "white" : "#9ca3af",
-                        transform: isItemActive(window.location.pathname) ? "translateX(4px)" : "translateX(0)"
+                        transform: isItemActive(window.location.pathname) ? "translateX(6px)" : "translateX(0)",
+                        boxShadow: isItemActive(window.location.pathname) 
+                          ? "0 8px 24px rgba(235, 139, 29, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset"
+                          : "none"
                       }}
                       onMouseEnter={(e) => {
                         if (!isItemActive(window.location.pathname)) {
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
                           e.currentTarget.style.color = "white";
+                          e.currentTarget.style.transform = "translateX(4px)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isItemActive(window.location.pathname)) {
                           e.currentTarget.style.background = "transparent";
                           e.currentTarget.style.color = "#9ca3af";
+                          e.currentTarget.style.transform = "translateX(0)";
                         }
                       }}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon size={20} />
-                        <span className="font-medium">{item.label}</span>
+                      <div className="flex items-center gap-3.5">
+                        <Icon size={20} className="group-hover:scale-110 transition-transform duration-200" />
+                        <span className="font-medium text-[15px]">{item.label}</span>
                       </div>
                       <ChevronDown
-                        size={16}
-                        className="transition-transform duration-200"
+                        size={18}
+                        className="transition-all duration-300"
                         style={{
                           transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)"
                         }}
@@ -214,40 +238,53 @@ const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
                     </button>
                   )}
 
-                  {/* Submenu */}
+                  {/* Enhanced Submenu */}
                   {hasSubItems && (
                     <div
                       className="overflow-hidden transition-all duration-300"
                       style={{
-                        maxHeight: isExpanded ? "200px" : "0"
+                        maxHeight: isExpanded ? "200px" : "0",
+                        opacity: isExpanded ? 1 : 0
                       }}
                     >
-                      <div className="mt-1 ml-6 space-y-1">
-                        {item.subItems?.map((subItem) => (
+                      <div className="mt-2 ml-4 space-y-1 pl-4 border-l-2 border-white border-opacity-10">
+                        {item.subItems?.map((subItem, index) => (
                           <NavLink
                             key={subItem.label}
                             to={subItem.path}
-                            className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200"
+                            onClick={() => setIsOpen(false)}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 group"
                             style={({ isActive: navActive }) => ({
-                              background: navActive ? "rgba(235, 139, 29, 0.1)" : "transparent",
+                              background: navActive ? "rgba(235, 139, 29, 0.15)" : "transparent",
                               color: navActive ? "#eb8b1d" : "#9ca3af",
-                              borderLeft: navActive ? "2px solid #eb8b1d" : "2px solid transparent"
+                              borderLeft: navActive ? "3px solid #eb8b1d" : "3px solid transparent",
+                              marginLeft: "-2px",
+                              animationDelay: `${index * 50}ms`,
+                              animation: isExpanded ? "slideIn 0.3s ease-out forwards" : "none"
                             })}
                             onMouseEnter={(e) => {
                               if (e.currentTarget.getAttribute("aria-current") !== "page") {
-                                e.currentTarget.style.background = "rgba(255, 255, 255, 0.03)";
+                                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
                                 e.currentTarget.style.color = "white";
+                                e.currentTarget.style.transform = "translateX(4px)";
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (e.currentTarget.getAttribute("aria-current") !== "page") {
                                 e.currentTarget.style.background = "transparent";
                                 e.currentTarget.style.color = "#9ca3af";
+                                e.currentTarget.style.transform = "translateX(0)";
                               }
                             }}
                           >
-                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
-                            <span className="text-sm">{subItem.label}</span>
+                            <div 
+                              className="w-2 h-2 rounded-full transition-all duration-200 group-hover:scale-125" 
+                              style={{ 
+                                background: "currentColor",
+                                boxShadow: "0 0 8px currentColor"
+                              }} 
+                            />
+                            <span className="font-medium">{subItem.label}</span>
                           </NavLink>
                         ))}
                       </div>
@@ -259,45 +296,20 @@ const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
           </div>
         </nav>
 
-        {/* User Profile Section */}
-        {/* <div
-          className="p-4 border-t"
+        {/* Enhanced Footer with gradient */}
+        <div
+          className="p-4 border-t relative"
           style={{
-            borderColor: "rgba(255, 255, 255, 0.1)"
+            borderColor: "rgba(255, 255, 255, 0.08)",
+            background: "linear-gradient(0deg, rgba(235, 139, 29, 0.05) 0%, transparent 100%)"
           }}
         >
-          <div
-            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200"
-            style={{
-              background: "rgba(255, 255, 255, 0.05)"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-            }}
-          >
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
-              style={{
-                background: "linear-gradient(135deg, #b5ce07 0%, #a3ba06 100%)"
-              }}
-            >
-              JD
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-medium text-sm">John Doe</p>
-              <p className="text-gray-400 text-xs">john@company.com</p>
-            </div>
-            <button
-              className="text-gray-400 hover:text-white transition-colors"
-              onClick={() => alert("Logout clicked")}
-            >
-              <LogOut size={18} />
-            </button>
+          <div className="text-center">
+            <p className="text-gray-500 text-xs font-medium">
+              Powered by <span className="text-orange-400">Admin System</span>
+            </p>
           </div>
-        </div> */}
+        </div>
       </div>
 
       <style>{`
@@ -310,23 +322,43 @@ const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
           }
         }
 
-        /* Custom Scrollbar */
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        /* Enhanced Custom Scrollbar */
         nav::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         
         nav::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.03);
           border-radius: 10px;
+          margin: 8px 0;
         }
         
         nav::-webkit-scrollbar-thumb {
-          background: rgba(235, 139, 29, 0.3);
+          background: linear-gradient(180deg, rgba(235, 139, 29, 0.4) 0%, rgba(235, 139, 29, 0.6) 100%);
           border-radius: 10px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
         }
         
         nav::-webkit-scrollbar-thumb:hover {
-          background: rgba(235, 139, 29, 0.5);
+          background: linear-gradient(180deg, rgba(235, 139, 29, 0.6) 0%, rgba(235, 139, 29, 0.8) 100%);
+          background-clip: padding-box;
+        }
+
+        /* Smooth scroll behavior */
+        nav {
+          scroll-behavior: smooth;
         }
       `}</style>
     </>

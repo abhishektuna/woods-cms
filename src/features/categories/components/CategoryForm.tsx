@@ -77,9 +77,18 @@ export function CategoryForm({ category, onSuccess, onCancel }: any) {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center mb-4">
-        <PackageIcon className="w-6 h-6 text-orange-500 mr-2" />
-        <h2 className="text-lg font-semibold text-gray-800">{category ? "Edit Category" : "Create Category"}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <PackageIcon className="w-6 h-6 text-orange-500 mr-2" />
+          <h2 className="text-lg font-semibold text-gray-800">{category ? "Edit Category" : "Create Category"}</h2>
+        </div>
+        {!onCancel && (
+          <Button 
+            text="Back" 
+            onClick={() => navigate(-1)}
+            className="!bg-gray-100 !text-gray-700 hover:!bg-gray-200"
+          />
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

@@ -11,7 +11,6 @@ export function Navbar({ toggleSidebar }: { toggleSidebar: () => void }) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state: any) => state.auth);
   const userData = user.data;
-  console.log( )
   const navigate = useNavigate();
 
   const notifications = [

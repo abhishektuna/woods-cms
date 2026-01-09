@@ -73,9 +73,6 @@ export default function ProductForm() {
     setForm({ ...form, categoryType: "subcategory", categoryRef: id });
   };
 
-  console.log("subcategories:", subcategories);
-  console.log("categories:", categories);
-
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchSubCategories());
@@ -271,9 +268,16 @@ export default function ProductForm() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
-          <div className="flex items-center mb-2">
-            <Package className="w-8 h-8 text-orange-500 mr-3" />
-            <h1 className="text-3xl font-bold text-gray-800">Create Product</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Package className="w-8 h-8 text-orange-500 mr-3" />
+              <h1 className="text-3xl font-bold text-gray-800">Create Product</h1>
+            </div>
+            <Button
+              text="Back"
+              onClick={() => navigate(-1)}
+              className="!bg-gray-100 !text-gray-700 hover:!bg-gray-200"
+            />
           </div>
           <p className="text-gray-600">
             Fill in the details to add a new product to your catalog
